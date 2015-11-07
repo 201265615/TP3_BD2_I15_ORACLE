@@ -1,0 +1,66 @@
+---------------------------------------------------------------------------------------------
+--------------------------------      Proyecciones    ---------------------------------------
+---------------------------------------------------------------------------------------------
+Generar tipos de cambios
+	con el SP_PROYECCIONTCNMESES  @PDATESTART DATE, @PNUMMESES NUMERIC, @PNUMVALREALES NUMERIC
+	EJEMPLO
+	exec SP_PROYECCIONTCNMESES  getdate(),	--Fecha de inicio
+						5,					--Meses hacia adelante
+						7					--Numero de meses para atras que toma de referencia
+
+
+Generar proyecciones de precios para los articulos de una lista de precios
+	con el SP_PROYECCIONGENERAR @PDESCLISTAPRECIO VARCHAR(40), @PNUMMESES NUMERIC, @PRESP VARCHAR OUTPUT
+	EJEMPLO
+	SP_PROYECCIONGENERAR 'Sector publico',		--Lista de precios
+						 4,						--Numero de meses que quiere proyectar a esta lista y debe ser menor o igual al numero de meses proyectado(arriba)
+						 NULL					--NADA
+
+
+
+---------------------------------------------------------------------------------------------
+--------------------------------      Replicacion     ---------------------------------------
+---------------------------------------------------------------------------------------------
+En sqlserver01
+	Crear full backup de la base de datos en C:\temporal en sqlserver01
+
+
+En sqlserver02
+	Copiar de sqlserver01 a sqlserver02 el backup
+	Clic derecho sobre databases y restore database
+	Clic en device
+	Buscar el backup
+	Overwrite database
+	Quitar los checks de la segunda parte
+	Finish
+
+En sqlserver01
+	en Replication clic derecho sobre local publications
+	clic en new publication
+		seguir todos los pasos de la ventana
+
+	clic sobre la publicacion creada y dar clic sobre configure peer-to-peer topology
+		ic-itcr\sqladmin
+		Solaris2014
+
+
+
+---------------------------------------------------------------------------------------------
+--------------------------------      Mirroring     -----------------------------------------
+---------------------------------------------------------------------------------------------
+En sqlserver01
+	Crear full backup de la base de datos en C:\temporal en sqlserver01
+
+
+En sqlserver02
+	Copiar de sqlserver01 a sqlserver02 el backup
+	Clic derecho sobre databases y restore database
+	Clic en device
+	Buscar el backup
+	Overwrite database
+	restore with norecovery
+	Quitar los checks de la segunda parte
+
+En sqlserver01
+	Clic derecho y luego en mirroring
+	grant connect on endpoint::Mirroring to public

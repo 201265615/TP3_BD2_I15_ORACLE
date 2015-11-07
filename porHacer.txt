@@ -1,0 +1,348 @@
+falta:
+	hacer inserts en el script de llenado de 
+		cotizaciones
+		cotizacion estados
+		paises
+		provincias
+		ciudades
+		direcciones
+
+	cambiar el tipo de dato de paises a varchar (LISTO)
+	cambiar PK de empresa (cedula juridica) que no sea autoincrement,cambiar nombreComercial de empresa a varchar (LISTO)
+
+	quitar codArticulo, undMedida como PK de articuloCotizados (LISTO)
+
+	delete rule, cascade en cotizaciones y articulos cotizados (LISTO)
+
+
+
+
+
+INSERT INTO T_Cotizaciones()
+
+
+
+	-------------------
+	para pruebas
+	-------------------
+
+
+
+SELECT * FROM T_Cotizaciones
+
+Delete  from T_cotizaciones
+
+SELECT * FROM T_Articulos
+
+INSERT INTO T_COMPONENTES VALUES('SL02.8G08ME500SSD','FP110')
+
+exec SP_ComponentesArticulo 'FP110'
+
+exec SP_ArticulosComponente 'SL02.8G08ME500SSD'
+
+SELECT * FROM T_FacturaCompras
+
+insert into T_FacturaCompras(fecCompra,fecRegistro,codUserRegistro) values(GETDATE(),GETDATE(),'admin')
+
+delete from T_LineasFacturaCompras
+
+insert into T_LineasFacturaCompras values(1,'FP110',600,5);
+
+select * from T_LineasFacturaCompras
+
+select * from T_Articulos
+
+select * from T_usuarios
+
+
+
+
+
+-----------------------------------------------
+------Agregar esto al script de llenado--------
+-----------------------------------------------
+
+
+use grupo1;
+
+INSERT INTO T_CotizacionEstados(descripcion) VALUES('emitida');
+
+INSERT INTO T_Paises(nombre) VALUES('Costa Rica');
+
+INSERT INTO T_Provincias(nombre,codPais) VALUES('Cartago', (SELECT codPais FROM T_Paises WHERE nombre = 'Costa Rica'));
+
+INSERT INTO T_Cuidades(nombre,codProvincia) VALUES('Cartago',(SELECT codProvincia FROM T_Provincias WHERE nombre = 'Cartago'));
+
+INSERT INTO T_DetalleDireccion(codCiudad,aparPostal,detalle1,detalle2) VALUES((SELECT codCiudad FROM T_Cuidades WHERE nombre = 'Cartago'),'5051','Tec','ITCR');
+
+INSERT INTO T_TipoEmpresa(nombre) VALUES ('proveedor');
+
+INSERT INTO T_Empresa(cedulaJuridica,nombreComercial,direccion,codTipoEmpresa) VALUES ('12345','empresa proveedora',1,1);
+
+INSERT INTO T_MesAnio(mes,anio) VALUES(1,2015);
+
+INSERT INTO T_Cotizaciones(fecRegistro,cedJurCliente,condicionPago,condicionVenta,vigencia,observaciones,codMoneda,codEstadoCotiz,codListaPrecios,mesEntreg,anioEntreg)
+					VALUES(GETDATE(),(SELECT cedulaJuridica FROM T_Empresa WHERE nombreComercial = 'empresa proveedora'),'Pago Contado','Venta Contado','vigente','Sin observaciones', (SELECT codigo FROM T_Monedas WHERE nombre = 'dolares'),(SELECT codigo FROM T_CotizacionEstados WHERE descripcion = 'emitida'),(SELECT codigo FROM T_ListaPrecios WHERE descripcion = 'sector publico'),1,2015);
+
+INSERT INTO T_ArticulosCotizados(numCotizacion,codArticulo,undMedida,cantidad,porcenDescuento,costoUnitario,costoGrabado,montoLinea)
+						VALUES(1000,'FP110',(SELECT codigo FROM T_UnidadMedidas WHERE descripcion = 'unidad estandar'),10,10,100,100,100);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------
+probar trigger 
+
+
+
+use grupo1
+
+INSERT INTO T_Cotizaciones(fecRegistro,cedJurCliente,condicionPago,condicionVenta,vigencia,observaciones,codMoneda,codEstadoCotiz,codListaPrecios,mesEntreg,anioEntreg)
+					VALUES(GETDATE(),(SELECT cedulaJuridica FROM T_Empresa WHERE nombreComercial = 'empresa proveedora'),'Pago Contado','Venta Contado','vigente','Sin observaciones', (SELECT codigo FROM T_Monedas WHERE nombre = 'dolares'),(SELECT codigo FROM T_CotizacionEstados WHERE descripcion = 'vigente'),(SELECT codigo FROM T_ListaPrecios WHERE descripcion = 'sector publico'),1,2015);
+
+INSERT INTO T_ArticulosCotizados(numCotizacion,codArticulo,undMedida,cantidad,porcenDescuento,costoUnitario,costoGrabado,montoLinea)
+						VALUES(1000,'FTCO2175',(SELECT codigo FROM T_UnidadMedidas WHERE descripcion = 'unidad estandar'),10,10,100,100,100);
+						
+
+INSERT INTO T_ArticulosCotizados(numCotizacion,codArticulo,undMedida,cantidad,porcenDescuento,costoUnitario,costoGrabado,montoLinea)
+						VALUES(1000,'SL02.8G08ME500SSD',(SELECT codigo FROM T_UnidadMedidas WHERE descripcion = 'unidad estandar'),10,10,100,100,100);
+
+
+
+DELETE FROM T_ArticulosCotizados WHERE codArticulo = 'FP110'
+
+SELECT * FROM T_Articulos
+
+
+
+
+
+DELETE FROM T_ArticulosCotizadosHisto
+DELETE FROM T_CotizacionesHisto
+
+
+
+
+SELECT * FROM T_Cotizaciones
+
+SELECT * FROM T_CotizacionesHisto
+
+SELECT * FROM T_ArticulosCotizados
+
+SELECT * FROM T_ArticulosCotizadosHisto
+
+Delete  from T_cotizaciones
+
+SELECT * FROM T_Articulos
+
+INSERT INTO T_COMPONENTES VALUES('SL02.8G08ME500SSD','FP110')
+
+exec SP_ComponentesArticulo 'FP110'
+
+exec SP_ArticulosComponente 'SL02.8G08ME500SSD'
+
+SELECT * FROM T_FacturaCompras
+
+insert into T_FacturaCompras(fecCompra,fecRegistro,codUserRegistro) values(GETDATE(),GETDATE(),'admin')
+
+delete from T_LineasFacturaCompras
+
+insert into T_LineasFacturaCompras values(1,'FP110',600,5);
+
+select * from T_LineasFacturaCompras
+
+select * from T_Articulos
+
+select * from T_usuarios
+
+
+
+
+
+
+
+
+
+
+
+-----------------------------------------------------------
+-- Autor: Kevin Alonso Escobar Miranda, Moises Viales Espinoza, Marcos Calderon Badilla
+-- Fecha: 22/05/2015
+-- Descripcion: tal que antes  de  eliminar  una cotización, cuyo estado sea emitida, grabe en tablas de históricos los datos de  ésta y sus líneas //with encryption
+-----------------------------------------------------------
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'TR' AND name = 'BEF_DEL_COTIZ_INS_HISTO')
+DROP TRIGGER BEF_DEL_COTIZ_INS_HISTO
+GO
+CREATE TRIGGER BEF_DEL_COTIZ_INS_HISTO
+ON T_Cotizaciones
+WITH ENCRYPTION
+INSTEAD OF DELETE
+AS	
+	SET NOCOUNT ON  -- apagar el envio de metadatos
+	
+	-- Variables para control de transaccion
+	DECLARE @ErrorNumber INT, @ErrorSeverity INT, @ErrorState INT, @CustomError INT
+	DECLARE @Message VARCHAR(200)
+	DECLARE @InicieTransaccion BIT
+
+	-- Realizar todas las operaciones de lectura posibles y precalculos que 
+	-- no sean parte o que puedan realizarse fuera de la transaccion
+	
+	
+	SET @InicieTransaccion = 0 -- control de transacciones
+	IF @@TRANCOUNT=0 BEGIN
+		SET @InicieTransaccion = 1
+		SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+		BEGIN TRANSACTION		
+	END			
+	
+	BEGIN TRY -- control de excepciones
+	
+		-- INSERTAR LA COTIZACION EN EL HISTORIAL
+		INSERT INTO T_CotizacionesHisto(
+			fecRegistro,
+			cedJurCliente,
+			condicionPago,
+			condicionVenta,
+			vigencia,
+			observaciones,
+			codMoneda,
+			codEstadoCotiz,
+			codListaPrecios,
+			mesEntreg,
+			AnioEntreg
+		)
+		VALUES(
+			(SELECT fecRegistro FROM DELETED),
+			(SELECT cedJurCliente FROM DELETED),
+			(SELECT condicionPago FROM DELETED),
+			(SELECT condicionVenta FROM DELETED),
+			(SELECT vigencia FROM DELETED),
+			(SELECT observaciones FROM DELETED),
+			(SELECT codMoneda FROM DELETED),
+			(SELECT codEstadoCotiz FROM DELETED),
+			(SELECT codListaPrecios FROM DELETED),
+			(SELECT mesEntreg FROM DELETED),
+			(SELECT AnioEntreg FROM DELETED)
+		);
+		
+		
+		
+		-- CURSOR QUE RECORRE LOS ARTICULOS COTIZADOS DE LA COTIZCION A ELIMINAR 
+		-- Declaracion de variables para el cursor
+		DECLARE @Id int,
+			@v_numCotizacion int,
+			@v_codArticulo varchar(20),
+			@v_undMedida tinyint,
+			@v_cantidad int,
+			@v_porcenDecuento tinyint,
+			@v_costoUnitario decimal(17,2),
+			@v_montoLinea decimal(17,2),
+			@v_CotizacionesHistoNumCotizacion int
+			
+		-- Declaración del cursor
+		DECLARE cursor_ArticulosCotizados CURSOR FOR
+		SELECT  
+			AC.numCotizacion,
+			AC.codArticulo,
+			AC.undMedida,
+			AC.cantidad,
+			AC.porcenDescuento,
+			AC.costoUnitario,
+			AC.montoLinea
+		FROM T_ArticulosCotizados AC
+
+		-- Apertura del cursor
+		OPEN cursor_ArticulosCotizados
+
+		-- Lectura de la primera fila del cursor
+		FETCH cursor_ArticulosCotizados INTO
+			@v_numCotizacion,
+			@v_codArticulo,
+			@v_undMedida,
+			@v_cantidad,
+			@v_porcenDecuento,
+			@v_costoUnitario,
+			@v_montoLinea
+		
+
+		WHILE (@@FETCH_STATUS = 0 )
+		
+		-- Realizar accion	
+		BEGIN
+
+			INSERT INTO T_ArticulosCotizadosHisto(
+				numCotizacion,
+				codArticulo,
+				undMedida,
+				cantidad,
+				porcenDescuento,
+				costoUnitario,
+				montoLinea,
+				T_CotizacionesHistonumCotizacion)
+			VALUES(
+				(SELECT @@IDENTITY FROM T_CotizacionesHisto), -- Selecciona el ultimo insertado
+				@v_codArticulo,
+				@v_undMedida,
+				@v_cantidad,
+				@v_porcenDecuento,
+				@v_costoUnitario,
+				@v_montoLinea,
+				@v_numCotizacion
+			)
+	
+			-- Lectura de la siguiente fila del cursor
+			FETCH cursor_ArticulosCotizados INTO
+				@v_numCotizacion,
+				@v_codArticulo,
+				@v_undMedida,
+				@v_cantidad,
+				@v_porcenDecuento,
+				@v_costoUnitario,
+				@v_montoLinea
+				
+		END
+		
+		DELETE FROM T_Cotizaciones WHERE numero = (SELECT numero FROM DELETED); --borrar todas las lineas de cotizacion
+		
+		-- Cierre del cursor
+		CLOSE cursor_ArticulosCotizados
+		-- Liberar los recursos
+		DEALLOCATE cursor_ArticulosCotizados
+		
+
+		IF @InicieTransaccion=1 BEGIN
+			COMMIT
+		END		
+	END TRY
+	BEGIN CATCH
+		SET @ErrorNumber = ERROR_NUMBER()
+		SET @ErrorSeverity = ERROR_SEVERITY()
+		SET @ErrorState = ERROR_STATE()
+		SET @Message = ERROR_MESSAGE()
+		
+		IF @InicieTransaccion=1 BEGIN
+			ROLLBACK
+		END
+		RAISERROR('%s - Error Number: %i', 
+			@ErrorSeverity, @ErrorState, @Message, @CustomError)
+	END CATCH	
+	
+RETURN
+
+
+
+
+
+
